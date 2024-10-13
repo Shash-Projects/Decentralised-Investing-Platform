@@ -1,7 +1,8 @@
 // src/Routes.js
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Propose from'./components/Propose';
+import CreateProposals from'./components/Propose';
+//import Propose from'./components/Propose';
 import CreateDao from './components/createDao';
 import Invest from './components/Invest'; 
 import EngageDao from './components/EngageDao';
@@ -16,11 +17,11 @@ const AppRoutes = () => {
       <Router>
         <Routes>
           <Route path="/" element={<App/>} />
-          <Route path="/propose" element={<Propose />} />
+          <Route path="/engage-DAO/create-proposal" element={<CreateProposals />} />
           <Route path="/create-DAO" element={<CreateDao />} />
           <Route path="/engage-DAO" element={<EngageDao />} />
           <Route path="/invest" element={<Invest />} />
-          <Route path="/stake" element={<Stake />} />
+          <Route path="/engage-DAO/stake" element={<Stake />} />
         </Routes>
       </Router>
     </AuthProvider>

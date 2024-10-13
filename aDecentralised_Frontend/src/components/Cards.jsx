@@ -38,7 +38,7 @@ const ProposerInvestorCards = (props) => {
             buttonLink="/engage-DAO" 
             isConnected={props.isConnected}
           />
-           <Card
+           {/* <Card
             title="Stake at DAO"
             description="khela hobe"
             buttonText="Interact with your Organization"
@@ -57,7 +57,7 @@ const ProposerInvestorCards = (props) => {
             description="Browse and invest in exciting opportunities proposed by others. Join a thriving ecosystem and be part of innovative projects that align with your interests."
             buttonText="Buy Tokens"
             buttonLink="/invest" 
-          />
+          /> */}
         </div>
       </div>
     </section>

@@ -1,5 +1,7 @@
 import React from "react";
 import { useState } from "react";
+import { useLocation } from 'react-router-dom';  // Add this import at the top
+
 import { useForm } from "react-hook-form";
 import { useAuth } from "../AuthContext";
 import { ethers } from "ethers";
@@ -37,6 +39,9 @@ class ErrorBoundary extends React.Component {
 
 const CreateProposal = () => {
   const { provider, isConnected } = useAuth();
+  const location = useLocation();  // Use location to get passed state
+  const { daoAddress } = location.state || {};  // Destructure the passed DAO address
+  console.log(daoAddress);
   const {
     register,
     handleSubmit,
@@ -84,16 +89,12 @@ const CreateProposal = () => {
 
   const ToPropose = async () => {
     try {
-      const contractAddress = "0x28730Bf391106F55f8cFB3a98F452Ea34c9Bac93";
-      const contract = new ethers.Contract(
-        contractAddress,
-        contractABI,
-        provider
-      );
-
+      const contractAddress = daoAddress;  // Use the passed DAO address
+      const contract = new ethers.Contract(contractAddress, contractABI, provider);
+  
       const signer = provider.getSigner();
       const contractWithSigner = contract.connect(signer);
-
+  
       const tx = await contractWithSigner.makeProposal(
         proposal.target,
         proposal.amountToInvest,
@@ -103,7 +104,7 @@ const CreateProposal = () => {
         proposal.initialSupply,
         proposal.tokenPrice
       );
-
+  
       await tx.wait();
       console.log("Tx successful: proposal created", tx.hash);
       reset();
@@ -112,6 +113,7 @@ const CreateProposal = () => {
       setError("general", { message: "An error occurred while creating the proposal." });
     }
   };
+  
 
   return (
     <ErrorBoundary>
@@ -126,16 +128,14 @@ const CreateProposal = () => {
         >
           <div className="flex flex-col">
             <label htmlFor="target" className="mb-1 font-medium">
-              Home DAO Address
+            DAO Address
             </label>
             <input
-              type="text"
-              id="target"
-              className="p-2 border border-gray-300 rounded"
-              placeholder="DAO that you are part of"
-              {...register("target", {
-                required: "DAO Address is required",
-              })}
+            type="text"
+            id="daoAddress"
+            value={daoAddress}  // Display the passed daoAddress
+            disabled  // Prevent user from changing the DAO address
+            className="p-2 border border-gray-300 rounded"
             />
             {errors.target && (
               <p className="text-red-500">{errors.target.message}</p>
