@@ -5,8 +5,7 @@ import { useAuth } from "../AuthContext";
 import { ethers } from "ethers";
 import { contractABI, contractByteCode } from "../../Constants";
 
-
-const Stake =()=>{
+function VoteForProposal() {
 
     const { provider, isConnected } = useAuth();
     const {
@@ -17,10 +16,10 @@ const Stake =()=>{
         formState: { isSubmitting, errors },
       } = useForm();
 
-    const handleStaking = async(data)=>{
+    const handleVoting = async (data)=>{
         if (!isConnected) {
             setError("general", {
-              message: "You must be logged in to create a proposal.",
+              message: "You must be logged in to vote for proposal.",
             });
             return;
           }
@@ -37,29 +36,24 @@ const Stake =()=>{
         const signer = provider.getSigner();
         const contractWithSigner = contract.connect(signer);
         
-        const stakeAmt = data.stake;
-        console.log(stakeAmt);
-        
-
         try {
-             const tx = await contractWithSigner.stake({value: stakeAmt});
-             await tx.wait();
-             console.log("Tx successful: Staked ", tx.hash);
-             document.getElementById(
-                "remark"
-            ).innerHTML = `Staked Successfully ${tx.hash}`;
-             reset();
-        } catch (error) {
-            console.log("Error: ", error);
-            setError("general", { message: "An error occurred while creating the proposal." });
-        }
+            const tx = await contractWithSigner.VoteForProposal(data.vote, data.proposalIndex);
+            await tx.wait();
+            console.log("Tx successful: Vote delivered ",data.vote, " to Proposal Index ", data.proposalIndex,"| ", tx.hash);
+            document.getElementById(
+               "remark"
+           ).innerHTML = `Staked Successfully ${tx.hash}`;
+            reset();
+       } catch (error) {
+           console.log("Error: ", error);
+           setError("general", { message: "An error occurred while creating the proposal." });
+       }
     }  
-
 
   return (
     <div>
         <form 
-        onSubmit={handleSubmit(handleStaking)}
+        onSubmit={handleSubmit(handleVoting)}
         className='flex flex-col items-center  text-gray-950 rounded  '
         >
           <div className='border flex flex-col rounded shadow-lg w-64 items-center mt-6'>
@@ -80,19 +74,35 @@ const Stake =()=>{
               <p className="text-red-500">{errors.expiryHr.message}</p>
             )}
 
+            <label htmlFor="vote" className="mb-1 font-medium">
+              Vote - True/False ?
+            </label>
+            <input
+                type="text"
+                id="vote"
+                className="p-2 border border-gray-300 rounded"
+                placeholder="Vote"
+                {...register("vote", {
+                    required: "Vote is required",
+              })}
+            />
+            {errors.vote && (
+              <p className="text-red-500">{errors.vote.message}</p>
+            )}
+
             <div className="flex flex-col">
-                <label htmlFor="expiryHr" className="mb-1 font-medium">
-                Stake Amount (wei)
+                <label htmlFor="proposalIndex" className="mb-1 font-medium">
+                    Proposal Index
                 </label>
                 <input
                 type="number"
-                id="stake"
+                id="proposalIndex"
                 className="p-2 border border-gray-300 rounded"
-                placeholder="Stake amount"
-                {...register("stake", { required: "Stake Amount cannot be zero" })}
+                placeholder="Index"
+                {...register("proposalIndex", { required: "Proposal index is a required field" })}
             />
-            {errors.stake && (
-              <p className="text-red-500">{errors.expiryHr.message}</p>
+            {errors.proposalIndex && (
+              <p className="text-red-500">{errors.proposalIndex.message}</p>
             )}
           </div>
 
@@ -113,5 +123,4 @@ const Stake =()=>{
   )
 }
 
-
-export default Stake;
+export default VoteForProposal
