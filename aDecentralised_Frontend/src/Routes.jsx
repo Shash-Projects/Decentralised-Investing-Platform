@@ -11,6 +11,7 @@ import { AuthProvider } from './AuthContext';
 import Stake from './components/Stake';
 import VoteForProposal from './components/VoteForProposal';
 import FundDistribution from './components/FundDistribution';
+import BuyTokens from './components/BuyTokens';
 
 
 const AppRoutes = () => {
@@ -26,6 +27,7 @@ const AppRoutes = () => {
           <Route path="/engage-DAO/stake" element={<Stake />} />
           <Route path="/engage-DAO/vote-for-proposal" element={<VoteForProposal />} />
           <Route path="/engage-DAO/fund-distribution" element={<FundDistribution />} />
+          <Route path="/engage-DAO/buy-tokens" element={<BuyTokens />} />
         </Routes>
       </Router>
     </AuthProvider>
