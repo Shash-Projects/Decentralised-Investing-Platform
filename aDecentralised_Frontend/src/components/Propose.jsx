@@ -1,5 +1,6 @@
 import React from "react";
 import { useState } from "react";
+import { useLocation } from "react-router-dom"; 
 import { useForm } from "react-hook-form";
 import { useAuth } from "../AuthContext";
 import { ethers } from "ethers";
@@ -37,6 +38,8 @@ class ErrorBoundary extends React.Component {
 
 const CreateProposal = () => {
   const { provider, isConnected } = useAuth();
+  const location = useLocation();  // Use location to get passed state
+  const { daoAddress } = location.state || {};  // Destructure the passed DAO address
   const {
     register,
     handleSubmit,
@@ -44,6 +47,14 @@ const CreateProposal = () => {
     reset,
     formState: { isSubmitting, errors },
   } = useForm();
+
+  const listenLogs = (proposalId)=>{
+    console.log("Proposal Created with ID:", proposalId.toString());
+    document.getElementById("remark").textContent = `Proposal Created with ID: ${proposalId}`;
+    reset();
+
+  }
+
 
   const handleCreateProposal = async (data) => {
     if (!isConnected) {
@@ -58,17 +69,16 @@ const CreateProposal = () => {
       return;
     }
 
-    // daoAddress = ethers.utils.getAddress(data.daoAddress);
     await ToPropose(data);
   };
 
   const ToPropose = async (data) => {
     try {
      
-      console.log("Dao - Address", data.daoAddress);
+      console.log("Dao - Address =", daoAddress);
   
       const contract = new ethers.Contract(
-        data.daoAddress,
+        daoAddress,
         contractABI,
         provider
       );
@@ -79,7 +89,7 @@ const CreateProposal = () => {
       const tx = await contractWithSigner.makeProposal(
         data.target,
         data.marginForStakers,
-        data.marginForPublic,
+        // data.marginForPublic,
         data.expiryHr,
         data.initialSupply,
         data.tokenPrice
@@ -87,7 +97,10 @@ const CreateProposal = () => {
 
       await tx.wait();
       console.log("Tx successful: proposal created", tx.hash);
-      reset();
+      // LIstener for event logs
+      contractWithSigner.on("proposalCreated", listenLogs);
+    
+
     } catch (error) {
       console.log("Error:", error);
       console.log("Error message:", error.message);
@@ -107,7 +120,7 @@ const CreateProposal = () => {
           onSubmit={handleSubmit(handleCreateProposal)}
           className="shadow-2xl flex flex-col bg-white gap-4 p-6 border-gray-900 rounded-lg w-full max-w-lg"
         >
-          <div className="flex flex-col">
+          {/* <div className="flex flex-col">
             <label htmlFor="daoAddress" className="mb-1 font-medium">
               Home DAO Address
             </label>
@@ -123,7 +136,7 @@ const CreateProposal = () => {
             {errors.target && (
               <p className="text-red-500">{errors.target.message}</p>
             )}
-          </div>
+          </div> */}
 
 
           <div className="flex flex-col">
@@ -162,7 +175,7 @@ const CreateProposal = () => {
             )}
           </div>
 
-          <div className="flex flex-col">
+          {/* <div className="flex flex-col">
             <label htmlFor="marginForPublic" className="mb-1 font-medium">
               Margin for Public
             </label>
@@ -178,7 +191,7 @@ const CreateProposal = () => {
             {errors.marginForPublic && (
               <p className="text-red-500">{errors.marginForPublic.message}</p>
             )}
-          </div>
+          </div> */}
 
           <div className="flex flex-col">
             <label htmlFor="expiryHr" className="mb-1 font-medium">
@@ -239,6 +252,7 @@ const CreateProposal = () => {
           >
             {isSubmitting ? "Creating Proposal..." : "Create Proposal"}
           </button>
+          <p id="remark" className="text-green-500 text-sm text-center mt-2" ></p>
           {errors.general && (
             <p className="text-red-500 text-center mt-2">
               {errors.general.message}
